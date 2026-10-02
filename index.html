@@ -1,0 +1,2130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Personal e-portfolio of coursework, projects and activities.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:ital,wght@0,600;0,700;1,600;1,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<!--ARTIFACT-START-->
+<title>Dark Hour</title>
+<style>
+/* ==============================================================
+   DARK HOUR — a student e-portfolio in the visual language of
+   Persona 3: midnight grounds, electric accents, skewed plates,
+   Arcana numerals and a moon that hangs behind everything.
+
+   Content lives in the PORTFOLIO object in the <script> below.
+   Colour lives in the two themes in section 1.
+   ============================================================== */
+
+/* ---- 1. Palettes -------------------------------------------
+   Bare :root is Midnight. A viewer on a light system gets
+   Daylight unless they pick one, and an explicit pick always wins. */
+:root{
+  --bg:#060b1c; --bg-2:#030814;
+  --surface:#0d1631; --surface-2:#152244;
+  --ink:#eef3ff; --ink-2:#b6c6e8; --muted:#7c90bc;
+  --line:#26365f; --line-soft:#1a2748;
+  --acc:#6b93ff; --acc-2:#2b53e6; --acc-ink:#050b1c;
+  --moon:#cfe1f5; --moon-shade:rgba(0,0,0,.5); --moon-alpha:.3;
+  --glow:rgba(107,147,255,.32);
+  --scrim:rgba(2,5,14,.72);
+  --shadow-1:0 1px 2px rgba(0,0,0,.5);
+  --shadow-2:0 2px 10px rgba(0,0,0,.45), 0 26px 60px -18px rgba(0,0,0,.8);
+  --tex:.055;
+
+  --display:"Barlow Condensed",ui-sans-serif,"Arial Narrow",system-ui,sans-serif;
+  --sans:"Barlow",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  /* The blue hover shadow: solid accent, no blur, offset equally in x and y
+     so it falls at 45 degrees toward the bottom right. Two forms, both
+     resolving against whichever --acc the current theme has.
+     `--lift`  : box-shadow, for ordinary boxes.
+     `--lift-f`: the same as a filter, for the panels whose notched corner is
+                 cut with clip-path -- clip-path clips box-shadow away, while a
+                 filter applies after the clip and traces the cut silhouette. */
+  --lift:   .45rem .45rem 0 var(--acc);
+  --lift-f: drop-shadow(.45rem .45rem 0 var(--acc));
+  /* for the few hovers that fill themselves with the accent: the same hard
+     shadow in a deeper shade, so the shadow does not merge into the fill */
+  --lift-deep: .45rem .45rem 0 color-mix(in srgb, var(--acc) 55%, #000);
+
+  --skew:-9deg;
+  --rail:9.5rem;
+  --page:74rem;
+  --gutter:clamp(1.15rem,4vw,2.75rem);
+  --prose:60ch;
+}
+/* Light: the dark-blue accent on a pale ground. Also what printing uses. */
+:root[data-theme="light"]{
+  --bg:#edf1fa; --bg-2:#e1e7f5;
+  --surface:#ffffff; --surface-2:#f7f9ff;
+  --ink:#0d1633; --ink-2:#2c3a5e; --muted:#566790;
+  --line:#b9c4de; --line-soft:#d3dbec;
+  --acc:#0b4fd6; --acc-2:#0a7fc4; --acc-ink:#ffffff;
+  --moon:#efe1a2; --moon-shade:rgba(122,100,28,.20); --moon-alpha:.6;
+  --glow:rgba(11,79,214,.16);
+  --scrim:rgba(13,22,51,.42);
+  --shadow-1:0 1px 2px rgba(13,22,51,.10);
+  --shadow-2:0 2px 8px rgba(13,22,51,.08), 0 22px 50px -16px rgba(13,22,51,.28);
+  --tex:.03;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#edf1fa; --bg-2:#e1e7f5;
+    --surface:#ffffff; --surface-2:#f7f9ff;
+    --ink:#0d1633; --ink-2:#2c3a5e; --muted:#566790;
+    --line:#b9c4de; --line-soft:#d3dbec;
+    --acc:#0b4fd6; --acc-2:#0a7fc4; --acc-ink:#ffffff;
+    --moon:#efe1a2; --moon-shade:rgba(122,100,28,.20); --moon-alpha:.6;
+    --glow:rgba(11,79,214,.16);
+    --scrim:rgba(13,22,51,.42);
+    --shadow-1:0 1px 2px rgba(13,22,51,.10);
+    --shadow-2:0 2px 8px rgba(13,22,51,.08), 0 22px 50px -16px rgba(13,22,51,.28);
+    --tex:.03;
+  }
+}
+
+/* ---- 2. Base ------------------------------------------------ */
+*,*::before,*::after{box-sizing:border-box;}
+html{
+  -webkit-text-size-adjust:100%;
+  scroll-behavior:smooth;
+  /* No overflow-x here: it would make <html> the scroll container and stop
+     the sticky nav from sticking. Wide layers clip inside their own boxes. */
+  scrollbar-width:none;              /* hidden scrollbars, by request */
+  -ms-overflow-style:none;
+}
+*::-webkit-scrollbar{display:none;}
+*{scrollbar-width:none;}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:1.0625rem;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+button{font:inherit;color:inherit;}
+figure,figcaption,dl,dt,dd{margin:0;}
+p{margin:0;}
+ul{margin:0;padding:0;list-style:none;}
+h1,h2,h3{margin:0;font-family:var(--display);font-weight:700;line-height:1.02;text-wrap:balance;}
+::selection{background:var(--acc);color:var(--acc-ink);}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px;}
+
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+.label{
+  font-family:var(--mono);font-size:.6875rem;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+}
+.hi{
+  background:linear-gradient(var(--glow),var(--glow)) no-repeat;
+  background-size:100% 42%;background-position:0 76%;
+  padding:0 .1em;color:var(--ink);
+}
+.pen{color:var(--acc);}
+.skip{
+  position:absolute;left:.6rem;top:-3.5rem;z-index:90;
+  padding:.6rem 1rem;background:var(--acc);color:var(--acc-ink);
+  font-weight:600;text-decoration:none;
+  transition:top 140ms ease-out;
+}
+.skip:focus{top:.6rem;}
+
+/* ---- 3. Skewed plate, the core P3 shape --------------------- */
+/* The container leans; its contents lean back so text stays upright. */
+.slab{transform:skewX(var(--skew));}
+.slab > *{transform:skewX(calc(var(--skew) * -1));}
+
+/* ---- 4. Texture, ground and parallax ------------------------ */
+.tex{position:fixed;inset:0;z-index:0;pointer-events:none;}
+/* still scanlines: texture, no movement */
+.tex-scan{
+  background-image:repeating-linear-gradient(
+    to bottom, currentColor 0 1px, transparent 1px 3px);
+  color:var(--ink);opacity:calc(var(--tex) * 1.7);
+}
+
+/* The ground. A vertical fall, plus two washes that drift now and then:
+   long cycles with long holds at each end, so it sits still most of the
+   time and only occasionally moves. Transform and opacity only. */
+.tex-ground{
+  background:linear-gradient(180deg, var(--bg-2), var(--bg) 45%, var(--bg-2));
+  overflow:hidden;
+}
+.wash{position:absolute;inset:-12%;display:block;will-change:transform,opacity;}
+.wash-a{
+  background:radial-gradient(58% 48% at 74% 14%,
+    color-mix(in srgb, var(--acc) 20%, transparent), transparent 70%);
+  animation:wash-drift-a 52s ease-in-out infinite, wash-breathe 41s ease-in-out infinite;
+}
+.wash-b{
+  background:radial-gradient(56% 46% at 12% 88%,
+    color-mix(in srgb, var(--acc-2) 24%, transparent), transparent 72%);
+  animation:wash-drift-b 67s ease-in-out infinite, wash-breathe 53s ease-in-out infinite -19s;
+}
+@keyframes wash-drift-a{
+  0%,16%{transform:translate3d(0,0,0) scale(1);}
+  50%{transform:translate3d(-5%,3%,0) scale(1.14);}
+  84%,100%{transform:translate3d(0,0,0) scale(1);}
+}
+@keyframes wash-drift-b{
+  0%,14%{transform:translate3d(0,0,0) scale(1);}
+  52%{transform:translate3d(4%,-4%,0) scale(1.1);}
+  86%,100%{transform:translate3d(0,0,0) scale(1);}
+}
+@keyframes wash-breathe{0%,100%{opacity:.8;}46%{opacity:1;}}
+
+.px{position:absolute;pointer-events:none;will-change:transform;}
+/* The moon. Pale and cool on the dark theme; a soft light yellow on the light
+   one, shaded warm rather than black so it keeps its hue. */
+.px-moon{
+  top:-9rem;right:-7rem;width:min(40rem,74vw);aspect-ratio:1;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 36% 32%, color-mix(in srgb, var(--moon) 88%, white) 0 36%, var(--moon) 58%, color-mix(in srgb, var(--moon) 72%, black) 100%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--moon) 60%, transparent),
+    0 0 9rem 2.5rem var(--glow),
+    inset -3rem -2.5rem 6rem var(--moon-shade);
+  opacity:var(--moon-alpha,.3);
+}
+
+.px-grid{
+  inset:auto -20vw -6rem;height:30rem;
+  background-image:
+    linear-gradient(currentColor 1px, transparent 1px),
+    linear-gradient(90deg, currentColor 1px, transparent 1px);
+  background-size:3.5rem 3.5rem;
+  color:var(--acc);opacity:.06;
+  transform:perspective(40rem) rotateX(62deg);
+  transform-origin:bottom center;
+}
+
+.sky{
+  position:absolute;top:0;left:0;width:100%;
+  height:min(130vh,84rem);
+  overflow:hidden;z-index:0;pointer-events:none;
+}
+
+/* ---- 4b. The cursor ----------------------------------------
+   A dot that tracks the pointer exactly, a ring that lags behind it
+   but can never let the dot escape.
+   Fine pointers only: a touch screen keeps its own behaviour. */
+.cur{
+  position:fixed;inset:0;z-index:200;
+  pointer-events:none;                 /* clicks pass straight through */
+  opacity:0;transition:opacity 220ms ease-out;
+}
+.cur[data-on="1"]{opacity:1;}
+.cur > *{position:absolute;top:0;left:0;will-change:transform;}
+
+.cur-dot{width:8px;height:8px;margin:-4px 0 0 -4px;}
+.cur-dot i{
+  display:block;width:100%;height:100%;border-radius:50%;
+  background:var(--acc);
+  transition:transform 200ms cubic-bezier(.23,1,.32,1);
+}
+.cur-ring{width:38px;height:38px;margin:-19px 0 0 -19px;}
+.cur-ring i{
+  display:block;width:100%;height:100%;border-radius:50%;
+  border:1.5px solid var(--acc);opacity:.7;
+  transition:transform 240ms cubic-bezier(.23,1,.32,1), opacity 240ms ease-out;
+}
+/* over anything clickable the ring opens up and the dot tucks in */
+.cur[data-hot="1"] .cur-ring i{transform:scale(1.45);opacity:1;}
+.cur[data-hot="1"] .cur-dot i{transform:scale(.55);}
+.cur[data-down="1"] .cur-ring i{transform:scale(.88);opacity:1;}
+
+
+/* the default pointer only goes away once the custom one is live */
+@media (hover:hover) and (pointer:fine){
+  body.has-cursor,body.has-cursor *{cursor:none !important;}
+}
+@media (hover:none),(pointer:coarse){
+  .cur{display:none;}
+}
+
+/* ---- 5. Page frame ------------------------------------------ */
+.page{position:relative;z-index:2;max-width:var(--page);margin:0 auto;padding:0 var(--gutter);}
+.shell{position:relative;z-index:1;}
+
+/* ---- 6. Chrome: nav and theme toggle ------------------------ */
+.chrome{position:sticky;top:0;z-index:50;padding:.8rem var(--gutter) .3rem;}
+.chrome-inner{
+  max-width:var(--page);margin:0 auto;
+  display:flex;align-items:center;gap:.6rem;
+}
+.nav{
+  position:relative;flex:1;min-width:0;
+  display:flex;align-items:center;gap:.1rem;
+  padding:.32rem .5rem;
+  background:color-mix(in srgb, var(--surface) 78%, transparent);
+  border:1px solid var(--line);
+  border-left:3px solid var(--acc);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:var(--shadow-1);
+  overflow-x:auto;scrollbar-width:none;
+  transform:skewX(var(--skew));
+}
+.nav::-webkit-scrollbar{display:none;}
+.nav > *{transform:skewX(calc(var(--skew) * -1));}
+.nav-mark{
+  flex:none;padding:.15rem .7rem .15rem .5rem;
+  font-family:var(--display);font-size:1.0625rem;font-weight:700;
+  font-style:italic;text-transform:uppercase;letter-spacing:.02em;
+  white-space:nowrap;text-decoration:none;
+}
+.nav-link{
+  flex:none;position:relative;z-index:2;
+  padding:.42rem .7rem;
+  font-family:var(--display);font-size:.9375rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;
+  color:var(--muted);text-decoration:none;white-space:nowrap;
+  transition:color 140ms ease-out;
+}
+.nav-link:hover{color:var(--ink);}
+.nav-link[aria-current="true"]{color:var(--acc-ink);}
+/* the indicator is a skewed slab that slides behind the active label */
+.nav-ind{
+  position:absolute;top:.32rem;bottom:.32rem;left:0;z-index:1;
+  /* This is where it lives when no section is current: a line standing on the
+     bar's edge. It is on screen from the first paint, so nothing fades in;
+     the first move simply slides out of it. translateX(0) rather than no
+     transform at all, so the nav's skew applies to it from the start. */
+  width:4px;
+  transform:translateX(0);
+  background:var(--acc);
+  opacity:1;pointer-events:none;
+  /* durations are set from JS, one per property, to keep the travel speed
+     constant; the order here is the order it writes them in */
+  transition-property:transform, width, opacity;
+  transition-duration:420ms, 420ms, 200ms;
+  transition-timing-function:cubic-bezier(.45,.05,.2,1), cubic-bezier(.45,.05,.2,1), ease-out;
+}
+/* Both icons share one grid cell and swap on opacity, never on display:
+   a display rule here would lose to `.theme-btn svg` and show both at once. */
+.theme-btn{
+  flex:none;display:grid;place-items:center;
+  width:2.6rem;height:2.35rem;
+  background:color-mix(in srgb, var(--surface) 78%, transparent);
+  border:1px solid var(--line);
+  color:var(--ink);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  box-shadow:var(--shadow-1);
+  cursor:pointer;
+  transform:skewX(var(--skew));
+  transition:transform 120ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+.theme-btn:hover{border-color:var(--acc);box-shadow:var(--lift);}
+.theme-btn:active{transform:skewX(var(--skew)) scale(.94);}
+.theme-btn svg{
+  grid-area:1/1;width:1.05rem;height:1.05rem;
+  transform:skewX(calc(var(--skew) * -1));
+  transition:opacity 240ms ease-out, transform 460ms cubic-bezier(.23,1,.32,1);
+}
+/* dark ground: offer the sun. light ground: offer the moon. */
+.theme-btn .icon-sun{opacity:1;}
+.theme-btn .icon-moon{opacity:0;transform:skewX(calc(var(--skew) * -1)) rotate(-80deg) scale(.5);}
+:root[data-theme="light"] .theme-btn .icon-sun{opacity:0;transform:skewX(calc(var(--skew) * -1)) rotate(80deg) scale(.5);}
+:root[data-theme="light"] .theme-btn .icon-moon{opacity:1;transform:skewX(calc(var(--skew) * -1));}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .theme-btn .icon-sun{opacity:0;transform:skewX(calc(var(--skew) * -1)) rotate(80deg) scale(.5);}
+  :root:not([data-theme="dark"]) .theme-btn .icon-moon{opacity:1;transform:skewX(calc(var(--skew) * -1));}
+}
+
+/* ---- 7. Cover ----------------------------------------------- */
+.hero{position:relative;padding:clamp(3rem,9vw,6.5rem) 0 clamp(2.5rem,6vw,4rem);}
+.hero-grid{
+  display:grid;grid-template-columns:minmax(0,1fr) 16rem;
+  gap:clamp(1.5rem,4vw,3.25rem);align-items:end;
+}
+.hero-eyebrow{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .75rem;margin-bottom:1.15rem;}
+.hero-dot{width:1.1rem;height:2px;background:var(--acc);flex:none;}
+.hero-name{
+  position:relative;
+  font-size:clamp(3rem,11vw,7rem);
+  font-style:italic;text-transform:uppercase;
+  letter-spacing:-.02em;
+  line-height:.92;
+}
+/* the accent ghost sitting behind the name, P3R's layered type */
+.hero-name span{
+  position:absolute;inset:0;z-index:-1;
+  color:var(--acc);                  /* solid, like every other shadow here */
+  /* close enough that the offset never exceeds a stroke width, so no ground
+     shows between a letter and its shadow */
+  transform:translate(.06em,.024em);
+}
+.hero-bar{
+  height:.55rem;width:min(24rem,80%);margin:.9rem 0 1.3rem;
+  background:linear-gradient(90deg,var(--acc),var(--acc-2) 70%, transparent);
+  transform:skewX(var(--skew));
+}
+.hero-tagline{
+  font-size:clamp(1.05rem,2.1vw,1.3rem);
+  line-height:1.5;max-width:44ch;color:var(--ink-2);
+}
+.hero-tagline em{font-style:italic;color:var(--acc);font-weight:500;}
+.hero-actions{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1.7rem;}
+@media (max-width:860px){
+  .hero-grid{grid-template-columns:minmax(0,1fr);}
+  .plate{max-width:12rem;}
+}
+
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.68rem 1.15rem;
+  font-family:var(--display);font-size:1rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;
+  text-decoration:none;cursor:pointer;
+  border:1px solid var(--line);
+  background:var(--surface-2);color:var(--ink);
+  transform:skewX(var(--skew));
+  transition:transform 120ms cubic-bezier(.23,1,.32,1), background-color 160ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+.btn > *{transform:skewX(calc(var(--skew) * -1));}
+.btn:hover{border-color:var(--acc);box-shadow:var(--lift);}
+.btn:active{transform:skewX(var(--skew)) scale(.975);}
+.btn-primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);}
+.btn-primary:hover{background:var(--ink);border-color:var(--ink);box-shadow:var(--lift);}
+.btn svg{width:1rem;height:1rem;flex:none;}
+
+.plate{
+  position:relative;aspect-ratio:var(--plate-aspect,4/5);width:100%;
+  border:1px solid var(--line);
+  background:var(--surface);box-shadow:var(--shadow-2);
+  overflow:hidden;
+  /* the notched corner that runs through P3's panels */
+  clip-path:polygon(0 0, 100% 0, 100% calc(100% - 2.2rem), calc(100% - 2.2rem) 100%, 0 100%);
+}
+.plate::after{
+  content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,var(--acc),transparent);
+}
+/* the frame leans toward the pointer; the JS writes --tilt-x / --tilt-y */
+.plate{
+  transform:perspective(760px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));
+  filter:drop-shadow(0 0 0 transparent); /* a from-value: box-shadow would be clipped by clip-path */
+  transition:transform 420ms cubic-bezier(.23,1,.32,1), filter 260ms ease-out;
+}
+.plate:hover{filter:var(--lift-f);}
+.plate img{width:100%;height:100%;object-fit:cover;object-position:var(--plate-focus,50% 30%);}
+/* The hover portrait sits on top of the first, already loaded, and swaps with
+   no transition at all: the change is meant to be instant, not a fade. */
+.plate-hover{
+  position:absolute;inset:0;
+  opacity:0;
+  transition:none;
+}
+.plate:hover .plate-hover{opacity:1;}
+.plate[data-fit="auto"]{aspect-ratio:auto;}
+.plate[data-fit="auto"] img{height:auto;object-fit:contain;}
+.plate-blank{
+  position:absolute;inset:0;display:grid;place-items:center;
+  background:linear-gradient(150deg,var(--surface-2),var(--bg));
+}
+.plate-mono{
+  font-family:var(--display);font-size:4rem;font-style:italic;font-weight:700;
+  color:var(--acc);opacity:.8;
+}
+.plate-cap{
+  position:absolute;left:0;right:2.4rem;bottom:0;padding:.4rem .65rem;
+  color:var(--ink);
+  background:color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+}
+
+/* ---- 8. Fact slabs ------------------------------------------ */
+.facts{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(10.5rem,1fr));
+  gap:.6rem;margin-top:clamp(2rem,5vw,3rem);
+}
+.fact{
+  position:relative;padding:.85rem 1rem .95rem;
+  background:var(--surface);
+  border:1px solid var(--line-soft);
+  border-top:2px solid var(--acc);
+  display:flex;flex-direction:column;gap:.3rem;
+  transition:transform 200ms cubic-bezier(.23,1,.32,1), border-color 200ms ease-out,
+             box-shadow 240ms ease-out;
+}
+.fact:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:var(--lift);}
+.fact-val{
+  font-family:var(--display);font-size:1.15rem;font-weight:600;
+  line-height:1.2;letter-spacing:.01em;
+}
+
+/* ---- 9. Sections -------------------------------------------- */
+.band{
+  position:relative;
+  display:grid;grid-template-columns:var(--rail) minmax(0,1fr);
+  gap:0 clamp(1.25rem,3.5vw,2.75rem);
+  padding:clamp(3rem,7vw,5.5rem) 0;
+  scroll-margin-top:5.5rem;
+}
+.band::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--acc),var(--line) 18%, transparent 70%);
+  opacity:.55;
+}
+.band-rail{position:relative;}
+.band-rail-inner{
+  position:sticky;top:6.5rem;
+  display:flex;flex-direction:column;gap:.55rem;align-items:flex-start;
+}
+/* the Arcana plate: section order as a Roman numeral */
+.arcana{
+  display:inline-block;padding:.16rem .7rem .2rem;
+  background:var(--acc);color:var(--acc-ink);
+  font-family:var(--mono);font-size:.75rem;font-weight:500;letter-spacing:.14em;
+  transform:skewX(var(--skew));
+}
+.arcana > *{display:block;transform:skewX(calc(var(--skew) * -1));}
+.band-title{
+  font-size:1.6rem;font-style:italic;text-transform:uppercase;
+  letter-spacing:.005em;line-height:1.05;
+}
+.band-note{font-size:.8125rem;line-height:1.45;color:var(--muted);max-width:11rem;}
+.band-body{position:relative;min-width:0;display:flex;flex-direction:column;gap:clamp(1.4rem,3vw,2.25rem);}
+/* the numeral again, vast and faint, drifting behind the content */
+.band-mark{
+  position:absolute;top:-3.5rem;right:-1rem;z-index:-1;
+  font-family:var(--display);font-size:12rem;font-weight:700;font-style:italic;
+  line-height:1;color:var(--acc);opacity:.06;
+  pointer-events:none;user-select:none;
+  will-change:transform;
+}
+.prose{max-width:var(--prose);display:flex;flex-direction:column;gap:1rem;color:var(--ink-2);font-size:1.0625rem;}
+.prose strong{color:var(--ink);font-weight:600;}
+@media (max-width:800px){
+  .band{grid-template-columns:minmax(0,1fr);gap:1.25rem;}
+  .band-rail-inner{position:static;flex-direction:row;align-items:center;gap:.75rem;flex-wrap:wrap;}
+  .band-note{display:none;}
+  .band-mark{font-size:7rem;top:-2rem;}
+}
+
+/* ---- 10. Records -------------------------------------------- */
+.records{display:flex;flex-direction:column;gap:1.15rem;}
+.record{
+  position:relative;
+  display:grid;grid-template-columns:10rem minmax(0,1fr);
+  gap:.4rem 1.5rem;
+  padding:1.15rem 1.25rem 1.2rem;
+  background:color-mix(in srgb, var(--surface) 70%, transparent);
+  border:1px solid var(--line-soft);
+  border-left:3px solid var(--acc);
+  transition:transform 220ms cubic-bezier(.23,1,.32,1), border-color 220ms ease-out,
+             background-color 220ms ease-out, box-shadow 240ms ease-out;
+}
+.record:hover{
+  transform:translateX(5px);
+  border-color:var(--acc);
+  background:var(--surface);
+  box-shadow:var(--lift);
+}
+.record-when{display:flex;flex-direction:column;gap:.2rem;padding-top:.2rem;}
+.record-when-main{
+  font-family:var(--mono);font-size:.8125rem;font-variant-numeric:tabular-nums;
+  color:var(--acc);letter-spacing:.03em;
+}
+.record-body{min-width:0;display:flex;flex-direction:column;gap:.5rem;}
+.record-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.15rem .7rem;}
+.record-title{font-size:1.25rem;font-style:italic;text-transform:uppercase;letter-spacing:.01em;}
+.record-org{font-size:.9375rem;color:var(--muted);}
+.record-detail{font-size:.9375rem;color:var(--ink-2);max-width:56ch;}
+.record-list{display:flex;flex-direction:column;gap:.35rem;margin-top:.1rem;}
+.record-list li{position:relative;padding-left:1.15rem;font-size:.9375rem;color:var(--ink-2);max-width:56ch;}
+.record-list li::before{
+  content:"";position:absolute;left:0;top:.55em;
+  width:.5rem;height:.5rem;background:var(--acc);
+  transform:skewX(var(--skew));
+}
+.grades{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.45rem;}
+.grade{
+  display:inline-flex;align-items:baseline;gap:.45rem;
+  padding:.2rem .6rem;
+  background:var(--surface-2);border:1px solid var(--line);
+  font-family:var(--mono);font-size:.75rem;font-variant-numeric:tabular-nums;
+  transform:skewX(var(--skew));
+}
+.grade > *{transform:skewX(calc(var(--skew) * -1));}
+.grade b{font-weight:500;color:var(--acc);}
+@media (max-width:580px){
+  .record{grid-template-columns:minmax(0,1fr);gap:.5rem;}
+  .record-when{flex-direction:row;gap:.7rem;padding-top:0;}
+}
+
+/* ---- 11. Project cards -------------------------------------- */
+.work{display:grid;grid-template-columns:repeat(auto-fill,minmax(17.5rem,1fr));gap:1.1rem;}
+.card{
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:.65rem;
+  padding:1.15rem 1.2rem 1.25rem;
+  text-align:left;cursor:pointer;
+  background:var(--surface);
+  border:1px solid var(--line);
+  clip-path:polygon(0 0, 100% 0, 100% calc(100% - 1.7rem), calc(100% - 1.7rem) 100%, 0 100%);
+  filter:drop-shadow(0 0 0 transparent);   /* a from-value, so the filter can transition */
+  transition:transform 200ms cubic-bezier(.23,1,.32,1), background-color 200ms ease-out,
+             border-color 200ms ease-out, filter 240ms ease-out;
+}
+.card:hover{
+  transform:translateY(-5px);
+  background:var(--surface-2);
+  border-color:var(--acc);
+  filter:var(--lift-f);
+}
+.card:active{transform:translateY(-1px) scale(.99);transition-duration:110ms;}
+/* the diagonal that closes the notched corner */
+.card::after{
+  content:"";position:absolute;right:-.62rem;bottom:.58rem;
+  width:2.6rem;height:1.5px;background:var(--acc);
+  transform:rotate(-45deg);opacity:.6;
+  transition:opacity 200ms ease-out;
+}
+.card:hover::after{opacity:1;}
+/* the index, vast and faint, as P3 sets its menu numbers */
+.card-idx{
+  position:absolute;top:-1.6rem;right:.3rem;
+  font-family:var(--display);font-size:6rem;font-weight:700;font-style:italic;
+  color:var(--acc);opacity:.09;line-height:1;pointer-events:none;
+}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:.7rem;}
+.card-code{
+  padding:.16rem .55rem .2rem;
+  background:var(--acc);color:var(--acc-ink);
+  font-family:var(--mono);font-size:.6875rem;font-weight:500;letter-spacing:.1em;
+  transform:skewX(var(--skew));
+  transition:transform 220ms cubic-bezier(.23,1,.32,1);
+}
+.card-code > *{display:block;transform:skewX(calc(var(--skew) * -1));}
+.card:hover .card-code{transform:skewX(var(--skew)) translateX(-3px);}
+.card-title{font-size:1.35rem;font-style:italic;text-transform:uppercase;line-height:1.06;}
+.card-blurb{font-size:.9375rem;line-height:1.55;color:var(--ink-2);}
+.card-foot{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:auto;padding-top:.4rem;}
+.tag{
+  font-family:var(--mono);font-size:.6875rem;letter-spacing:.05em;
+  padding:.18rem .5rem;color:var(--ink-2);
+  border:1px solid var(--line);
+}
+.card-more{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:var(--display);font-size:.875rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--acc);
+}
+.card-more svg{transition:transform 240ms cubic-bezier(.23,1,.32,1);}
+.card:hover .card-more svg{transform:translateX(5px);}
+
+/* ---- 12. Skills, awards, contact ---------------------------- */
+.kits{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:1.5rem 1.75rem;}
+.kit{display:flex;flex-direction:column;gap:.65rem;}
+.kit > .label{
+  padding-bottom:.35rem;
+  border-bottom:1px solid var(--line);
+  color:var(--ink);
+}
+.kit-items{display:flex;flex-wrap:wrap;gap:.4rem;}
+.chip{
+  display:inline-block;padding:.3rem .7rem;font-size:.875rem;
+  background:var(--surface);border:1px solid var(--line);
+  transform:skewX(var(--skew));
+  transition:transform 200ms cubic-bezier(.23,1,.32,1), border-color 200ms ease-out,
+             background-color 200ms ease-out, color 200ms ease-out, box-shadow 240ms ease-out;
+}
+.chip > *{display:block;transform:skewX(calc(var(--skew) * -1));}
+.chip:hover{
+  transform:skewX(var(--skew)) translateY(-3px);
+  background:var(--acc);color:var(--acc-ink);border-color:var(--acc);
+  box-shadow:var(--lift-deep);
+}
+
+.awards{display:flex;flex-direction:column;gap:.15rem;}
+.award{
+  display:grid;grid-template-columns:5rem minmax(0,1fr);
+  gap:.15rem 1rem;padding:.85rem .9rem;
+  border-bottom:1px solid var(--line-soft);
+  transition:background-color 200ms ease-out, padding-left 200ms cubic-bezier(.23,1,.32,1),
+             box-shadow 240ms ease-out;
+}
+.award:hover{
+  background:color-mix(in srgb, var(--surface) 70%, transparent);
+  padding-left:1.3rem;
+  box-shadow:var(--lift);
+}
+.award-year{
+  font-family:var(--mono);font-size:.8125rem;font-variant-numeric:tabular-nums;
+  color:var(--acc);padding-top:.15rem;
+}
+.award-title{font-size:1rem;font-weight:600;}
+.award-org{font-size:.875rem;color:var(--muted);}
+
+.contact-head{display:flex;flex-direction:column;gap:.5rem;}
+.contact-line{
+  align-self:flex-start;
+  font-family:var(--display);font-size:clamp(1.7rem,5.5vw,3rem);
+  font-style:italic;font-weight:700;text-transform:uppercase;
+  line-height:1.05;letter-spacing:.01em;text-decoration:none;
+  color:var(--ink);
+  background:linear-gradient(var(--acc),var(--acc)) no-repeat left bottom / 0% 3px;
+  transition:background-size 380ms cubic-bezier(.23,1,.32,1), color 200ms ease-out;
+  overflow-wrap:anywhere;
+}
+.contact-line:hover{color:var(--acc);background-size:100% 3px;}
+.links{display:flex;flex-wrap:wrap;gap:.6rem;}
+.link{
+  display:inline-flex;align-items:baseline;gap:.45rem;
+  padding:.5rem .85rem;text-decoration:none;
+  font-family:var(--display);font-weight:600;font-size:1rem;
+  text-transform:uppercase;letter-spacing:.05em;
+  background:var(--surface);border:1px solid var(--line);
+  transform:skewX(var(--skew));
+  transition:transform 200ms cubic-bezier(.23,1,.32,1), border-color 200ms ease-out, box-shadow 200ms ease-out;
+}
+.link > *{transform:skewX(calc(var(--skew) * -1));}
+.link:hover{transform:skewX(var(--skew)) translateY(-3px);border-color:var(--acc);box-shadow:var(--lift);}
+/* a link whose file is not uploaded yet: visible as a slot, not a dead click */
+.link-pending{
+  display:inline-flex;align-items:baseline;gap:.45rem;
+  padding:.5rem .85rem;
+  font-family:var(--display);font-weight:600;font-size:1rem;
+  text-transform:uppercase;letter-spacing:.05em;
+  color:var(--muted);
+  background:transparent;
+  border:1px dashed var(--line);
+  transform:skewX(var(--skew));
+  cursor:default;
+}
+.link-pending > *{transform:skewX(calc(var(--skew) * -1));}
+.link-pending .hint{
+  color:var(--muted);opacity:.75;font-family:var(--mono);font-size:.75rem;
+  text-transform:none;letter-spacing:0;font-weight:400;
+}
+.link .hint{
+  color:var(--muted);font-family:var(--mono);font-size:.75rem;
+  text-transform:none;letter-spacing:0;font-weight:400;
+}
+
+/* ---- 13. Footer --------------------------------------------- */
+.foot{
+  position:relative;overflow:clip;   /* keeps the floor grid from widening the page */
+  margin-top:clamp(2rem,5vw,3.5rem);
+  padding:1.6rem 0 3rem;
+  display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;
+  align-items:baseline;justify-content:space-between;
+}
+.foot::before{
+  content:"";position:absolute;top:0;left:-2rem;right:-2rem;height:3px;
+  background:linear-gradient(90deg,var(--acc),var(--acc-2) 45%, transparent);
+  transform:skewY(-.6deg);opacity:.8;
+}
+.foot p{font-family:var(--mono);font-size:.75rem;letter-spacing:.06em;color:var(--muted);}
+
+/* ---- 14. Project panel -------------------------------------- */
+.sheet-root{position:fixed;inset:0;z-index:70;display:none;}
+.sheet-root[data-open]{display:block;}
+.scrim{
+  position:absolute;inset:0;background:var(--scrim);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  opacity:0;transition:opacity 280ms ease-out;
+}
+.sheet-root[data-shown] .scrim{opacity:1;}
+.sheet-wrap{
+  position:absolute;left:0;right:0;bottom:0;
+  display:flex;justify-content:center;padding:0 var(--gutter);
+  will-change:transform;
+}
+.sheet{
+  position:relative;width:100%;max-width:42rem;
+  max-height:min(85vh,48rem);
+  display:flex;flex-direction:column;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-top:3px solid var(--acc);
+  box-shadow:var(--shadow-2), 0 0 4rem -1rem var(--glow);
+  clip-path:polygon(0 0, calc(100% - 1.9rem) 0, 100% 1.9rem, 100% 100%, 0 100%);
+  transform:translateY(1.5rem) scale(.97);
+  filter:blur(6px);opacity:.3;
+  transition:transform 340ms cubic-bezier(.22,1,.36,1), filter 340ms ease-out, opacity 240ms ease-out;
+}
+.sheet-root[data-shown] .sheet{transform:none;filter:blur(0);opacity:1;}
+.sheet-grab{
+  flex:none;padding:.75rem 1.35rem .65rem;
+  display:flex;flex-direction:column;gap:.8rem;
+  cursor:grab;touch-action:none;
+  border-bottom:1px solid var(--line-soft);
+}
+.sheet-grab:active{cursor:grabbing;}
+.sheet-handle{
+  width:2.75rem;height:4px;background:var(--muted);align-self:center;
+  transform:skewX(var(--skew));
+  transition:width 220ms cubic-bezier(.23,1,.32,1), background-color 220ms ease-out;
+}
+.sheet-grab[data-past="1"] .sheet-handle{width:4.5rem;background:var(--acc);}
+.sheet-head{display:flex;align-items:flex-start;gap:.85rem;}
+.sheet-head-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:.45rem;}
+.sheet-title{font-size:clamp(1.45rem,4vw,1.9rem);font-style:italic;text-transform:uppercase;line-height:1.05;}
+.sheet-meta{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .6rem;}
+.sheet-close{
+  flex:none;display:grid;place-items:center;
+  width:2.15rem;height:2.15rem;
+  background:var(--surface-2);border:1px solid var(--line);cursor:pointer;
+  transform:skewX(var(--skew));
+  transition:transform 120ms ease-out, border-color 160ms ease-out, background-color 160ms ease-out;
+}
+.sheet-close > *{transform:skewX(calc(var(--skew) * -1));}
+.sheet-close:hover{border-color:var(--acc);background:var(--acc);color:var(--acc-ink);box-shadow:var(--lift-deep);}
+.sheet-close:active{transform:skewX(var(--skew)) scale(.92);}
+.sheet-close svg{width:.85rem;height:.85rem;}
+.sheet-scroll{
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:1.2rem 1.35rem 1.8rem;
+  display:flex;flex-direction:column;gap:1.25rem;
+}
+.sheet-block{display:flex;flex-direction:column;gap:.55rem;}
+.sheet-block > .label{color:var(--acc);}
+.sheet-block p{font-size:.9375rem;line-height:1.65;color:var(--ink-2);max-width:58ch;}
+
+/* ---- 15. Accessibility preferences -------------------------- */
+@media (prefers-reduced-motion: reduce){
+  .px,.band-mark{transform:none !important;}
+  .wash{animation:none !important;}
+  .sheet{transition:opacity 180ms ease-out;transform:none;filter:none;}
+  .sheet-root[data-shown] .sheet{transform:none;}
+  .card:hover,.record:hover,.chip:hover,.link:hover,.fact:hover{transform:none;}
+  .chip:hover{transform:skewX(var(--skew));}
+  .link:hover{transform:skewX(var(--skew));}
+  .card:active,.btn:active{transform:none;}
+  .btn:active{transform:skewX(var(--skew));}
+  .card:hover .card-more svg,.card:hover .card-code{transform:none;}
+  .card:hover .card-code{transform:skewX(var(--skew));}
+  .theme-btn:active{transform:skewX(var(--skew));}
+  .theme-btn svg{transition:opacity 200ms ease-out;}
+  .contact-line{transition:color 200ms ease-out;}
+  .contact-line:hover{background-size:100% 3px;}
+  .award:hover{padding-left:.9rem;}
+  .nav-ind{transition:opacity 200ms ease-out;}
+}
+@media (prefers-reduced-transparency: reduce){
+  .nav,.theme-btn,.record,.award:hover,.plate-cap{background:var(--surface);-webkit-backdrop-filter:none;backdrop-filter:none;}
+  .scrim{-webkit-backdrop-filter:none;backdrop-filter:none;}
+  .tex{display:none;}
+}
+@media (prefers-contrast: more){
+  :root{--line:var(--muted);--line-soft:var(--muted);--ink-2:var(--ink);}
+  .tex,.px,.band-mark,.card-idx{display:none;}
+  .card,.chip,.grade,.tag,.link,.fact{border-color:var(--ink-2);}
+}
+
+/* added and removed by the theme toggle, so a theme change eases */
+:root.theming,:root.theming *{
+  transition:background-color 380ms ease, border-color 380ms ease, color 380ms ease,
+             fill 380ms ease, box-shadow 380ms ease, opacity 380ms ease !important;
+}
+
+/* ---- 16. Print: fall back to daylight, drop the theatre ----- */
+@media print{
+  :root{
+    --bg:#fff; --bg-2:#fff; --surface:#fff; --surface-2:#fff;
+    --ink:#000; --ink-2:#1a1a1a; --muted:#555;
+    --line:#999; --line-soft:#ccc;
+    --acc:#000; --acc-2:#000; --acc-ink:#fff; --glow:transparent;
+    --skew:0deg;
+  }
+  .chrome,.sheet-root,.tex,.px,.band-mark,.card-idx,.skip,.foot::before{display:none !important;}
+  body{font-size:10.5pt;overflow:visible;}
+  .band{break-inside:avoid;padding:1.2rem 0;}
+  .card,.record,.award{break-inside:avoid;box-shadow:none;clip-path:none;filter:none;}
+  .hero-name span{display:none;}
+  .plate{box-shadow:none;clip-path:none;filter:none;}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#about">Skip to content</a>
+
+<div class="tex tex-ground" aria-hidden="true">
+  <span class="wash wash-a"></span>
+  <span class="wash wash-b"></span>
+</div>
+<div class="tex tex-scan" aria-hidden="true"><i></i></div>
+
+<!-- the moon, and the floor grid under the footer, both parallaxed -->
+<div class="sky" aria-hidden="true">
+  <div class="px px-moon" id="px-moon"></div>
+</div>
+
+<header class="chrome" id="chrome">
+  <div class="chrome-inner">
+    <nav class="nav" id="nav" aria-label="Sections"></nav>
+    <button class="theme-btn" id="theme-btn" type="button" aria-label="Switch between the dark and light theme">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M20 14.4A8.6 8.6 0 0 1 9.6 4a8.4 8.4 0 1 0 10.4 10.4Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="page" id="main"></main>
+
+<div class="page">
+  <footer class="foot" id="foot"><div class="px px-grid" id="px-grid" aria-hidden="true"></div></footer>
+</div>
+
+<div class="sheet-root" id="sheet-root" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet-wrap" id="sheet-wrap">
+    <article class="sheet" id="sheet">
+      <div class="sheet-grab" id="sheet-grab">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="sheet-head">
+          <div class="sheet-head-text">
+            <div class="sheet-meta" id="sheet-meta"></div>
+            <h2 class="sheet-title" id="sheet-title"></h2>
+          </div>
+          <button class="sheet-close" id="sheet-close" type="button" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sheet-scroll" id="sheet-scroll"></div>
+    </article>
+  </div>
+</div>
+
+
+<!-- custom cursor: a dot, and a ring that lags behind it -->
+<div class="cur" id="cur" data-on="0" aria-hidden="true">
+  <div class="cur-ring" id="cur-ring"><i></i></div>
+  <div class="cur-dot" id="cur-dot"><i></i></div>
+</div>
+
+<script>
+
+const PORTFOLIO = {
+  profile: {
+    name: "Nathan Hartono",
+    initials: "NH",            
+    photo: "profile_picture.jpg",                 
+    photoCaption: "Bali, 2026",
+    photoHover: "profile_picture_hover.png",
+    photoHoverFocus: "",  
+    photoAspect: "4 / 5",  
+    photoFocus: "50% 22%", 
+    role: "Student of Santa Laurensia Graduation Year 2026",
+    school: "Santa Laurensia",
+    location: "Tangerang, Indonesia",
+    // rich text:
+    tagline: '"People like us, who believe in <em>physics</em>, know that the distinction between <em>past, present, and future</em> is only a <em>stubbornly persistent illusion</em>." <br> —Albert Einstein',
+    email: "nathan.hartono.indonesia@gmail.com",
+    resume: { label: "CV (PDF)", url: "cv.pdf" },   // url: "" hides this button
+    facts: [
+      { label: "Focus",     value: "Physics · Engineering" },
+      { label: "Predicted", value: "(to be filled)" },
+      { label: "Languages", value: "EN · ID" },
+      { label: "Current Priority",   value: "Finding a University in HongKong" }
+    ]
+  },
+
+  order: ["about", "education", "coursework", "skills", "activities", "awards", "contact"],
+  sections: {
+
+    about: {
+      kind: "prose",
+      nav: "About",
+      title: "About me",
+      note: "Who is writing, and why",
+      paragraphs: [
+        "I, Nathan Hartono, am a physics student who is interested and curious about how things work. Through this curiosity, I built a foundation for bridging fundamental physical laws with practical engineering. Applying mechanics, electronics, and computation to design intelligent control systems, robotics, and interactive tools.",
+      ]
+    },
+
+    education: {
+      kind: "records",
+      nav: "Education",
+      title: "Education",
+      note: "Schools, subjects, grades",
+      items: [
+        {
+          when: "2024 – 2027",
+          whenNote: "In progress",
+          title: "Pearson Edexcel A-Level Student",
+          org: "Santa Laurensia Senior High School",
+          detail: "Core Subjects include Physics, Chemistry, & Information Technology. As well as A-Levels Mathematics",
+          grades: [
+            { k: "CS Physics", v: "94.8" },
+            { k: "CS Chemistry", v: "93.1" },
+            { k: "CS IT", v: "92.5" },
+            { k: "A Level Maths", v: "97.9" }
+          ],
+          bullets: [
+            "IELTS BAND: 7.5",
+            "GPA: 3.92"
+          ]
+        },
+        {
+          when: "2023 – 2025",
+          whenNote: "Completed",
+          title: "100 Days of Code",
+          org: "UDEMY ◆ Dr. Angela Yu",
+          detail: "The 100 Days of Code by Dr. Angela Yu is a Complete Python Pro Bootcamp. With over 500,000 5 STAR reviews and a 4.8 average, her courses are some of the HIGHEST RATED courses in the history of Udemy!",
+        }
+      ]
+    },
+
+    coursework: {
+      kind: "projects",
+      nav: "Coursework",
+      title: "Coursework",
+      note: "Open any card for method and results",
+      items: [
+        {
+          code: "Physics Project",
+          year: "2024 - 2025",
+          title: "Piezoelectric floor panel [FAIL]",
+          blurb: "A kinetic floor tile project designed to convert human footstep pressure into electrical energy using mechanical gear assemblies and electromagnetic induction.",
+          tags: ["Energy Conversion", "Physics", "Engineering"],
+          detail: {
+            blocks: [
+              {
+                heading: "Problem",
+                body: "Harvesting sustainable, decentralised energy from high-foot-traffic areas requires converting mechanical human kinetic energy into usable electricity without relying on external power sources."
+              },
+              {
+                heading: "Work",
+                bullets: [
+                  "Designed a step-driven mechanical mechanism converting vertical footstep displacement into rotary motion via cogwheels and magnetic rotors.",
+                  "Applied Faraday's Law of Electromagnetic Induction using alternating North-South magnet configurations and wire coils to generate AC voltage.",
+                  "Built a diode rectification circuit to convert alternating current into direct current (DC) to power an external LED indicator.",
+                ]
+              },
+              {
+                heading: "Failure Analysis & Key Learnings",
+                body: "The prototype yielded an extremely low efficiency of 0.74%. Major energy losses were attributed to mechanical friction in the gear/pulley system, low magnetic field strength from degraded magnets, insufficient coil windings, and voltage drops across high-resistance rectifying diodes."
+              }
+            ],
+            links: [
+              { label: "Poster (PDF)", url: "#" },
+              { label: "Prototype Design", url: "#" }
+            ]
+          }
+        },
+        {
+          code: "KREASI Competition",
+          year: "2025",
+          title: "Project MEMORA",
+          blurb: "Memora is an AI based digital companion designed specifically for patients with mild-to-moderate dementia. Memora provides emotional support, activity monitoring, and contextual reminders.",
+          tags: ["AI Chatbot & Object Detection", "Dementia Care", "Engineering"],
+          detail: {
+            blocks: [
+              { heading: "Problem",
+                body: "Dementia is a progressive brain disorder that impairs memory, thinking, and orientation. Over 57 million people worldwide live with it, and nearly 10 million new cases emerge each year." },
+              { heading: "Work",
+                bullets: [
+                  "Built a Python code that integrates Anthropic API, YOLO Object Detection and Google Workspace API",
+                  "Remind the activity detected by the Object Recognition AI and Activities needed to be done by the patient.",
+                  "Recorded a effectiveness of Memora via a real dementia patient."
+                ] },
+              { heading: "Solution",
+                body: "Memora acts as an intelligent bridge between patients and caregivers. By combining real-time visual perception via YOLO object detection with the conversational intelligence of the Anthropic API, the system continuously logs spatial context and daily routines. It syncs schedule data using Google Workspace APIs to prompt gentle, contextual reminders—helping patients maintain independence while giving caregivers reliable monitoring metrics." },
+              { heading: "Impact",
+                bullets: [
+    "Successfully validated real-time object and activity tracking in a home environment with minimal false positives.",
+    "Demonstrated a measurable reduction in patient anxiety during daily routine transitions through continuous contextual prompts.",
+    "Streamlined caregiver logging by automating routine verification and activity tracking into Google Sheets/Calendar."
+  ] }
+            ],
+            links: [
+              { label: "Document (PDF)", url: "#" },
+              { label: "Poster (PDF)", url: "#" }
+            ]
+          }
+        },
+{
+          code: "Research Project",
+          year: "2025 - 2026",
+          title: "Object detection Waste Management System",
+          blurb: "A system that utilizes the Internet of Things and object detection to sort trash based on the type (Metal, Plastic, Paper and Glass)",
+          tags: ["Machine Learning (Object Detection)", "Python", "Engineering"],
+          detail: {
+            blocks: [
+              {
+                heading: "Problem",
+                body: "Indonesia produces millions of tons of unmanaged waste annually, with over 51% consisting of unprocessed inorganic material. Over-reliance on manual sorting leads to high operational costs, labor inefficiency, and severe landfill strain."
+              },
+              {
+                heading: "Work",
+                bullets: [
+                  "Designed and constructed a smart waste bin prototype featuring a Raspberry Pi 4, Pi Camera, Arduino Uno, and custom servo-driven rotary sorting chambers.",
+                  "Trained and deployed a YOLOv8 real-time object detection model capable of classifying waste into four distinct categories: Metal, Plastic, Paper, and Glass.",
+                  "Implemented a frame-locking algorithm requiring 8 consecutive identical detections to prevent false triggers before communicating via USB serial to actuate physical servos.",
+                  "Evaluated system performance through 109 live detection tests across diverse material items and angles, achieving an overall accuracy of 80.9% ."
+                ]
+              },
+              {
+                heading: "Impact",
+                body: "Demonstrated a viable, low-cost AI and IoT integration that automates waste classification at the point of disposal, eliminating human error in sorting and mitigating contamination in recyclable waste streams."
+              }
+            ],
+            links: [{ label: "Document (PDF)", url: "#" }]
+          }
+        },
+{
+          code: "Research Project",
+          year: "2026",
+          title: "Balancing an Inverted Pendulum using Reinforcement Learning in a physics environment",
+          blurb: "Applying continuous control reinforcement learning algorithms to dynamically stabilize an inverted pendulum cart-pole system simulated in MuJoCo.",
+          tags: ["Reinforcement Learning", "Physics", "Control Theory"],
+          detail: {
+            blocks: [
+              {
+                heading: "Problem",
+                body: "The inverted pendulum is a classic non-linear, underactuated control problem. Traditional linear controllers often struggle with high non-linearities and external disturbances, requiring adaptive learning-based policies to maintain dynamic stability across varying state-action spaces."
+              },
+              {
+                heading: "Work",
+                bullets: [
+                  "Modeled a continuous cart-pole physical system in the MuJoCo physics engine to simulate realistic rigid-body dynamics and contact forces.",
+                  "Formulated the continuous state-action space, defining joint angles, angular velocities, cart displacement, and horizontal control forces.",
+                  "Designed a custom reward function penalizing angular deviation and actuation effort while rewarding upright stability near the origin.",
+                  "Trained and hyperparameter-tuned a Soft Actor-Critic (SAC) reinforcement learning model to achieve rapid policy convergence and smooth control response."
+                ]
+              },
+              {
+                heading: "Results",
+                body: "The trained SAC policy successfully learned to balance the pendulum from arbitrary initial tilt angles, demonstrating high robustness against state perturbations while minimizing unnecessary control force output."
+              }
+            ],
+            links: [{ label: "Document (PDF)", url: "#" }]
+          }
+        }
+      ]
+    },
+
+skills: {
+  kind: "skills",
+  nav: "Skills",
+  title: "Skills",
+  note: "Things I can do unsupervised",
+  groups: [
+    {
+      group: "Engineering & Hardware",
+      items: [
+        "Raspberry Pi 5",
+        "Arduino IDE & Microcontrollers",
+        "Circuit Prototyping",
+        "3D Printing & CAD Design",
+        "Sensor Integration",
+        "Basic Soldering & Wiring",
+        "Logical Problem Solving",
+        "Root Cause Analysis"
+      ]
+    },
+    {
+      group: "Software & Development",
+      items: [
+        "Python (Scripting & Data)",
+        "AutoCAD",
+        "API Integrations",
+        "HTML / CSS / JavaScript",
+      ]
+    },
+    {
+      group: "Creative & Media",
+      items: [
+        "DaVinci Resolve (Video Editing)",
+        "Canva",
+        "Color Grading & Audio Mixing",
+        "Technical Documentation",
+        "Visual Content Creation"
+      ]
+    },
+    {
+      group: "Productivity & AI",
+      items: [
+        "AI Tool Mastery (Prompt Engineering)",
+        "Google Workspace Administration",
+        "Data Analysis & Visualization",
+      ]
+    },
+    {
+      group: "Languages",
+      items: [
+        "English ◆ IELTS 7.5 (Full Professional Proficiency)",
+        "Bahasa Indonesia ◆ Native",
+        "Mandarin ◆ Basic"
+      ]
+    }
+  ]
+},
+
+activities: {
+      kind: "records",
+      nav: "Activities",
+      title: "Activities",
+      note: "Outside the timetable",
+      items: [
+        {
+          when: "2026 – 2027",
+          title: "Main Committee",
+          org: "Santa Laurensia Math Club",
+          detail: "Leadership and organization of extracurricular academic programs.",
+          bullets: [
+            "Coordinated club operations, workshop sessions, and peer tutoring for advanced mathematics.",
+            "Managed event logistics and student engagement across high school grade levels."
+          ]
+        },
+        {
+          when: "2022 – 2026",
+          title: "Altar Server",
+          org: "Saint Lawrence Church",
+          detail: "Community service and liturgical assistance.",
+          bullets: [
+            "Served regularly in weekly school masses.",
+            "Demonstrated strong commitment, discipline, and reverence in community service."
+          ]
+        },
+        {
+          when: "2026",
+          title: "Mangrove Volunteer",
+          org: "Mangrove Planting Project (PIK Resort)",
+          detail: "Environmental conservation effort.",
+          bullets: [
+            "Participated in coastal restoration initiatives by planting mangrove saplings to prevent shoreline erosion."
+          ]
+        },
+        {
+          when: "2024 – 2025",
+          title: "Choral Performer",
+          org: "Church Choir",
+          detail: "Vocal music performance across major church liturgies.",
+          bullets: [
+            "Performed as a core choir member for Christmas 2024, Good Friday 2025, Sabbatum Sanctum 2025, and Indonesia's Independence Day Mass 2025."
+          ]
+        },
+{
+          when: "2026 – 2027",
+          title: "Math & Physics Educational Creator",
+          org: "Instagram Content Platform",
+          detail: "Creating clear, visual educational content and problem breakdowns for STEM students.",
+          bullets: [
+            "Produce instructional videos and post breakdowns explaining complex high school Math and Physics concepts.",
+            "Deconstruct exam-style questions step-by-step to assist students with problem-solving techniques and test prep.",
+            "Engage with followers through interactive Q&A sessions and targeted study discussions."
+          ]
+        }
+      ]
+    },
+
+awards: {
+      kind: "awards",
+      nav: "Awards",
+      title: "Awards Gained",
+      note: "Externally judged",
+      items: [
+        { year: "2026", title: "Participant ◆ OSN-K Astronomy", org: "Olimpiade Sains Nasional tingkat Kabupaten/Kota" },
+        { year: "2025", title: "Silver Medalist ◆ MSTL Category", org: "KREASI Competition" },
+        { year: "2025", title: "Best Booth Award", org: "KREASI Competition" },
+        { year: "2025", title: "Verbal Commendation ◆ DISEC Committee", org: "LIVI Model United Nations Competition" }
+      ]
+    },
+
+    contact: {
+      kind: "contact",
+      nav: "Contact",
+      title: "Contact",
+      note: "A reply within a day",
+      note2: "WhatsApp is fastest. I read it after 16:00 WIB on school days.",
+      primary: {
+        label: "WhatsApp",
+        text: "+62 813 2577 2931",
+        url: "https://wa.me/6281325772931"
+      },
+      links: [
+        { label: "Email", url: "mailto:nathan.hartono.indonesia@gmail.com", hint: "nathan.hartono.indonesia@gmail.com" },
+        { label: "Instagram", url: "https://instagram.com/n810_hartono", hint: "@n810_hartono" },
+        { label: "Full CV", url: "cv.pdf", hint: "PDF" }
+      ]
+    }
+  },
+
+  /* ---------------- 4. Colour ---------------- */
+  theme: {
+    /* "" follows the viewer own system setting. "dark" is the midnight
+       ground with the light-blue accent; "light" is the pale ground with
+       the dark-blue one. A visitor toggle wins over this, and is remembered. */
+    default: ""
+  },
+  footer: {
+    updated: "Updated September 2026",
+  }
+};
+(function () {
+  "use strict";
+
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const P = PORTFOLIO;
+  const prof = P.profile;
+  const sections = P.sections || {};
+  const order = (P.order || []).filter((k) => sections[k]);
+
+  document.title = prof.name + " — Portfolio";
+  const metaDesc = $('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute("content", prof.name + " — " + (prof.role || "student portfolio"));
+
+  /* ---- pieces ------------------------------------------------ */
+
+  /* mailto:, tel: and files beside the page stay in this tab; anything
+     off-site opens in a new one, so a visitor never loses the portfolio */
+  /* a placeholder like "" or "#" means "not uploaded yet" — skip it */
+  function live(l) {
+    const u = String((l && l.url) || "").trim();
+    return u !== "" && u !== "#";
+  }
+
+  function linkAttrs(url) {
+    return /^https?:\/\//i.test(String(url || ""))
+      ? ' target="_blank" rel="noopener noreferrer"'
+      : "";
+  }
+
+  /* keep only what a CSS length or ratio can contain */
+  const cssVal = (v) => String(v == null ? "" : v).replace(/[^0-9a-zA-Z.%/ -]/g, "").trim();
+
+  function plate() {
+    const inner = prof.photo
+      ? '<img src="' + esc(prof.photo) + '" alt="' + esc(prof.name) + '">'
+      : '<div class="plate-blank"><span class="plate-mono">' + esc(prof.initials || "") + "</span></div>";
+    /* Both portraits are in the DOM from the start, so the browser has the
+       second one decoded long before anyone hovers. */
+    const swap = (prof.photo && prof.photoHover)
+      ? '<img class="plate-hover" src="' + esc(prof.photoHover) + '" alt="" aria-hidden="true"' +
+        ' style="object-position:' +
+        (cssVal(prof.photoHoverFocus) || cssVal(prof.photoFocus) || "50% 30%") + '">'
+      : "";
+    const cap = prof.photoCaption
+      ? '<div class="plate-cap label">' + esc(prof.photoCaption) + "</div>"
+      : "";
+    const aspect = cssVal(prof.photoAspect) || "4 / 5";
+    const auto = aspect === "auto";
+    const style = (auto ? "" : "--plate-aspect:" + aspect + ";") +
+      "--plate-focus:" + (cssVal(prof.photoFocus) || "50% 30%") + ";";
+    return '<figure class="plate"' + (auto ? ' data-fit="auto"' : "") +
+      ' style="' + style + '">' + inner + swap + cap + "</figure>";
+  }
+
+  function hero() {
+    const eyebrow = [prof.role, prof.school, prof.location]
+      .filter(Boolean)
+      .map((t) => '<span class="label">' + esc(t) + "</span>")
+      .join('<span class="hero-dot" aria-hidden="true"></span>');
+
+    const actions = [];
+    if (prof.email) {
+      actions.push('<a class="btn btn-primary" href="mailto:' + esc(prof.email) + '">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M3 7.5h18v11H3zM3 7.5l9 6.5 9-6.5"/></svg>' +
+        "<span>Email me</span></a>");
+    }
+    if (prof.resume && prof.resume.url) {
+      actions.push('<a class="btn" href="' + esc(prof.resume.url) + '"' + linkAttrs(prof.resume.url) + ">" +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3.5v12M7.5 11l4.5 4.5 4.5-4.5M4.5 20h15"/></svg>' +
+        "<span>" + esc(prof.resume.label || "CV") + "</span></a>");
+    }
+
+    const facts = (prof.facts || []).length
+      ? '<dl class="facts">' + prof.facts.map((f) =>
+          '<div class="fact"><dt class="label">' + esc(f.label) + '</dt><dd class="fact-val">' + esc(f.value) + "</dd></div>").join("") + "</dl>"
+      : "";
+
+    return '<section class="hero" id="top">' +
+      '<div class="hero-grid">' +
+        "<div>" +
+          '<div class="hero-eyebrow">' + eyebrow + "</div>" +
+          /* the name twice over: the second copy is the accent ghost behind it */
+          '<h1 class="hero-name">' + esc(prof.name) +
+            '<span aria-hidden="true">' + esc(prof.name) + "</span>" +
+          "</h1>" +
+          '<div class="hero-bar" aria-hidden="true"></div>' +
+          '<p class="hero-tagline">' + (prof.tagline || "") + "</p>" +
+          (actions.length ? '<div class="hero-actions">' + actions.join("") + "</div>" : "") +
+        "</div>" +
+        plate() +
+      "</div>" + facts +
+    "</section>";
+  }
+
+  /* sections are numbered like Arcana, which is also just their order */
+  const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X",
+                 "XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"];
+
+  function band(key, index, bodyHTML) {
+    const s = sections[key];
+    const num = ROMAN[index] || String(index + 1);
+    return '<section class="band reveal" id="' + key + '" aria-labelledby="h-' + key + '">' +
+      '<div class="band-rail"><div class="band-rail-inner">' +
+        '<span class="arcana"><span>' + num + "</span></span>" +
+        '<h2 class="band-title" id="h-' + key + '">' + esc(s.title) + "</h2>" +
+        (s.note ? '<p class="band-note">' + esc(s.note) + "</p>" : "") +
+      "</div></div>" +
+      '<div class="band-body">' +
+        '<span class="band-mark" aria-hidden="true">' + num + "</span>" +
+        bodyHTML +
+      "</div>" +
+    "</section>";
+  }
+
+  function records(items) {
+    return '<div class="records">' + (items || []).map((r) =>
+      '<article class="record">' +
+        '<div class="record-when">' +
+          '<span class="record-when-main">' + esc(r.when || "") + "</span>" +
+          (r.whenNote ? '<span class="label">' + esc(r.whenNote) + "</span>" : "") +
+        "</div>" +
+        '<div class="record-body">' +
+          '<div class="record-head">' +
+            '<h3 class="record-title">' + esc(r.title || "") + "</h3>" +
+            (r.org ? '<span class="record-org">' + esc(r.org) + "</span>" : "") +
+          "</div>" +
+          (r.detail ? '<p class="record-detail">' + r.detail + "</p>" : "") +
+          ((r.bullets || []).length
+            ? '<ul class="record-list">' + r.bullets.map((b) => "<li>" + b + "</li>").join("") + "</ul>"
+            : "") +
+          ((r.grades || []).length
+            ? '<div class="grades">' + r.grades.map((g) =>
+                '<span class="grade"><span>' + esc(g.k) + " <b>" + esc(g.v) + "</b></span></span>").join("") + "</div>"
+            : "") +
+        "</div>" +
+      "</article>").join("") + "</div>";
+  }
+
+  function work(items) {
+    return '<div class="work">' + (items || []).map((p, i) =>
+      '<button class="card" type="button" data-project="' + i + '" aria-haspopup="dialog">' +
+        '<span class="card-idx" aria-hidden="true">' + String(i + 1).padStart(2, "0") + "</span>" +
+        '<div class="card-top">' +
+          '<span class="card-code"><span>' + esc(p.code || "") + "</span></span>" +
+          '<span class="label">' + esc(p.year || "") + "</span>" +
+        "</div>" +
+        '<h3 class="card-title">' + esc(p.title || "") + "</h3>" +
+        '<p class="card-blurb">' + (p.blurb || "") + "</p>" +
+        '<div class="card-foot">' + (p.tags || []).map((t) => '<span class="tag">' + esc(t) + "</span>").join("") + "</div>" +
+        '<span class="card-more">View more ' +
+          '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>' +
+        "</span>" +
+      "</button>").join("") + "</div>";
+  }
+
+  function kits(groups) {
+    return '<div class="kits">' + (groups || []).map((g) =>
+      '<div class="kit"><h3 class="label">' + esc(g.group) + "</h3>" +
+        '<div class="kit-items">' + (g.items || []).map((i) => '<span class="chip"><span>' + esc(i) + "</span></span>").join("") + "</div>" +
+      "</div>").join("") + "</div>";
+  }
+
+  function awards(items) {
+    return '<div class="awards">' + (items || []).map((a) =>
+      '<div class="award">' +
+        '<span class="award-year">' + esc(a.year) + "</span>" +
+        "<div>" +
+          '<div class="award-title">' + esc(a.title) + "</div>" +
+          (a.org ? '<div class="award-org">' + esc(a.org) + "</div>" : "") +
+        "</div>" +
+      "</div>").join("") + "</div>";
+  }
+
+  /* One shape for every link list. A url of "" or "#" has nothing to open
+     yet, so it renders as a dashed slot rather than a dead link. */
+  function linkHTML(l) {
+    if (live(l)) {
+      return '<a class="link" href="' + esc(l.url) + '"' + linkAttrs(l.url) + "><span>" + esc(l.label) +
+        (l.hint ? ' <span class="hint">' + esc(l.hint) + "</span>" : "") + "</span></a>";
+    }
+    return '<span class="link-pending" aria-disabled="true" title="Not uploaded yet"><span>' +
+      esc(l.label) + ' <span class="hint">' + esc(l.hint || "soon") + "</span></span></span>";
+  }
+
+  function contact(s) {
+    const pr = s.primary && s.primary.url
+      ? { label: s.primary.label, text: s.primary.text || s.primary.url, url: s.primary.url }
+      : (prof.email ? { label: "Email", text: prof.email, url: "mailto:" + prof.email } : null);
+    const head = pr
+      ? '<div class="contact-head">' +
+          (pr.label ? '<span class="label">' + esc(pr.label) + "</span>" : "") +
+          '<a class="contact-line" href="' + esc(pr.url) + '"' + linkAttrs(pr.url) + ">" + esc(pr.text) + "</a>" +
+        "</div>"
+      : "";
+    const note = s.note2 ? '<p class="prose">' + s.note2 + "</p>" : "";
+    const links = (s.links || []).length
+      ? '<div class="links">' + s.links.map(linkHTML).join("") + "</div>"
+      : "";
+    return head + note + links;
+  }
+
+  function guess(s, key) {
+    if (s.paragraphs) return "prose";
+    if (s.groups) return "skills";
+    if (s.links && !s.items) return "contact";
+    const first = (s.items || [])[0] || {};
+    if (first.code !== undefined) return "projects";
+    if (first.when === undefined && first.year !== undefined) return "awards";
+    return "records";
+  }
+
+  const body = order.map((key, i) => {
+    const s = sections[key];
+    let inner = "";
+    switch (s.kind || guess(s, key)) {
+      case "prose":    inner = '<div class="prose">' + (s.paragraphs || []).map((p) => "<p>" + p + "</p>").join("") + "</div>"; break;
+      case "skills":   inner = kits(s.groups); break;
+      case "contact":  inner = contact(s); break;
+      case "projects": inner = work(s.items); break;
+      case "awards":   inner = awards(s.items); break;
+      default:         inner = records(s.items); break;
+    }
+    return band(key, i, inner);
+  }).join("");
+
+  $("#main").innerHTML = hero() + body;
+
+  /* No second portrait on disk yet? Remove it, so hovering shows the first
+     photo rather than a broken-image icon. */
+  const hoverImg = document.querySelector(".plate-hover");
+  if (hoverImg) {
+    hoverImg.addEventListener("error", () => hoverImg.remove(), { once: true });
+  }
+
+  $("#nav").innerHTML =
+    '<a class="nav-mark" href="#top">' + esc(prof.name) + "</a>" +
+    order.map((k) => '<a class="nav-link" href="#' + k + '">' + esc(sections[k].nav || sections[k].title) + "</a>").join("") +
+    '<span class="nav-ind" aria-hidden="true"></span>';
+
+  const f = P.footer || {};
+  $("#foot").innerHTML =
+    /* the perspective floor, re-added because this innerHTML replaces it */
+    '<div class="px px-grid" id="px-grid" aria-hidden="true"></div>' +
+    "<p>© " + new Date().getFullYear() + " " + esc(prof.name) + (f.updated ? " · " + esc(f.updated) : "") + "</p>" +
+    (f.credit ? '<p class="foot-note">' + esc(f.credit) + "</p>" : "");
+
+  /* ---- scroll, active section, reveal ------------------------- */
+
+  /* The parallax field. Each layer keeps the static transform CSS gave it, so
+     the page still looks right with JavaScript off, and gets a translate on top
+     of that here. One scroll listener, one write per frame, transforms only:
+     never height or top, which would re-lay-out the page on every frame. */
+  const layers = [
+    { el: $("#px-moon"), rate: -0.22, base: "" },
+    { el: $("#px-grid"), rate: -0.07, base: " perspective(40rem) rotateX(62deg)" }
+  ].filter((l) => l.el);
+
+  /* The section numerals drift as well. Their positions are measured once
+     rather than read every frame, so the loop never forces a layout. */
+  let marks = [];
+  let pageBottom = 0;             /* the largest scrollY the page can reach */
+  function measureMarks() {
+    marks = Array.prototype.map.call(document.querySelectorAll(".band-mark"), (m) => ({
+      el: m,
+      top: m.getBoundingClientRect().top + window.scrollY
+    }));
+    pageBottom = document.documentElement.scrollHeight - window.innerHeight;
+  }
+
+  let queued = false;
+  function frame() {
+    queued = false;
+    if (reduced()) return;
+    const y = window.scrollY;
+    const vh = window.innerHeight;
+    for (let i = 0; i < layers.length; i++) {
+      const l = layers[i];
+      l.el.style.transform = "translate3d(0," + (y * l.rate).toFixed(1) + "px,0)" + l.base;
+    }
+    for (let i = 0; i < marks.length; i++) {
+      const m = marks[i];
+      const rel = m.top - y;                        /* how far below the viewport top */
+      if (rel < -400 || rel > vh + 400) continue;   /* offscreen: leave it be */
+      const through = (rel - vh * 0.5) / vh;        /* crossing the middle: -0.5 to 0.5 */
+      m.el.style.transform = "translate3d(0," + (through * -70).toFixed(1) + "px,0)";
+    }
+  }
+
+  function onScroll() {
+    if (!queued) { queued = true; requestAnimationFrame(frame); }
+  }
+  measureMarks();
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", () => { measureMarks(); onScroll(); });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { measureMarks(); onScroll(); });
+  }
+
+  /* ---- motion: entrances, staggers, the drawn rule ------------ */
+
+  const EASE = "cubic-bezier(.23,1,.32,1)";
+
+  /* Entrances run through the Web Animations API rather than CSS transitions,
+     so no lingering transition competes with the 110ms press feedback, and
+     reduced motion simply skips them — the element is already at rest. */
+  function enter(el, frames, opts) {
+    if (!el || reduced() || typeof el.animate !== "function") return null;
+    try {
+      return el.animate(frames, Object.assign({ duration: 460, easing: EASE, fill: "backwards" }, opts || {}));
+    } catch (err) { return null; }
+  }
+
+  const rise = [{ opacity: 0, transform: "translateY(14px)" }, { opacity: 1, transform: "none" }];
+  /* Stagger 40–60ms, capped: past half a dozen items the tail just feels slow. */
+  const step = (i, ms) => Math.min(i, 6) * (ms || 55);
+
+  function revealBand(band) {
+    enter(band.querySelector(".arcana"),
+      [{ transform: "skewX(-9deg) scaleX(0)" }, { transform: "skewX(-9deg) scaleX(1)" }],
+      { duration: 520, delay: 40 });
+    enter(band.querySelector(".band-title"),
+      [{ opacity: 0, transform: "translateX(-16px)" }, { opacity: 1, transform: "none" }],
+      { duration: 520, delay: 120 });
+    enter(band.querySelector(".band-mark"),
+      [{ opacity: 0, transform: "translateX(40px)" }, { opacity: 0.06, transform: "none" }],
+      { duration: 900, delay: 60, fill: "both" });
+    band.querySelectorAll(".hi").forEach((h, i) =>
+      enter(h, [{ backgroundSize: "0% 44%" }, { backgroundSize: "100% 44%" }],
+        { duration: 720, delay: 240 + i * 140, fill: "both" }));
+    band.querySelectorAll(".card").forEach((c, i) =>
+      enter(c, [{ opacity: 0, transform: "translateY(18px) scale(.985)" }, { opacity: 1, transform: "none" }],
+        { duration: 480, delay: step(i, 60) }));
+    band.querySelectorAll(".record, .award, .kit").forEach((r, i) =>
+      enter(r, rise, { duration: 440, delay: step(i, 55) }));
+  }
+
+  const navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav-link"));
+  const ind = $(".nav-ind");
+  const bands = order.map((k) => document.getElementById(k));
+
+  /* Measured on layout, animated with transforms — the tab-indicator pattern.
+     The duration comes from the distance rather than being fixed, so the slab
+     covers the same pixels per second whether it is hopping to the next
+     section or crossing the whole bar. */
+  const IND_SPEED = 0.55;         /* px per ms — the one speed it ever travels at */
+  /* The floor sits below the shortest hop this nav actually makes and the ceiling
+     above the longest, so neither clamp fires in normal use and every trip runs
+     at the same speed. They are only guards against pathological cases, like a
+     one-pixel nudge after a resize. */
+  const IND_MIN = 90, IND_MAX = 1300;
+  const IND_HOME_W = 4;           /* the resting width, matching the CSS above */
+  function moveIndicator(instant, home) {
+    if (!ind) return;
+    /* home, or nothing current, is the same thing: the line on the edge */
+    const cur = home
+      ? null
+      : navLinks.filter((a) => a.getAttribute("aria-current") === "true")[0];
+    const x = cur ? cur.offsetLeft + 11 : 0;
+    const w = cur ? Math.max(14, cur.offsetWidth - 22) : IND_HOME_W;
+
+    /* it always starts from wherever it is; at first paint that is the edge */
+    const from = parseFloat(ind.dataset.x || "0");
+    const travel = Math.abs(x - from);
+    /* only a resize places it without travelling */
+    const ms = instant === true
+      ? 0
+      : Math.min(IND_MAX, Math.max(IND_MIN, travel / IND_SPEED));
+
+    /* two durations for the move, and one left for opacity, which no longer
+       changes but stays in the list so the three line up */
+    ind.style.transitionDuration = ms + "ms," + ms + "ms,200ms";
+    ind.dataset.x = String(x);
+    ind.style.width = w + "px";
+    ind.style.transform = "translateX(" + x + "px)";
+  }
+  window.addEventListener("resize", () => moveIndicator(true));
+
+  /* Clicking a section starts one continuous trip. The page smooth-scrolls past
+     every section in between, and the observer would report each one in turn,
+     which made the slab hop from link to link on the way. So a click claims the
+     indicator, points it straight at the target, and the observer stands down
+     until the scrolling settles. */
+  let navLock = null;
+  let lockTimer = 0, idleTimer = 0;
+
+  function releaseNav() {
+    navLock = null;
+    window.clearTimeout(lockTimer);
+    window.clearTimeout(idleTimer);
+  }
+
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest ? e.target.closest(".nav-link,.nav-mark") : null;
+    if (!a) return;
+    const id = (a.hash || "").slice(1);
+    if (!id || !document.getElementById(id)) return;
+    navLock = id;
+    if (a.classList.contains("nav-link")) {
+      navLinks.forEach((l) => l.setAttribute("aria-current", l === a ? "true" : "false"));
+      moveIndicator();             /* one move, straight to where they asked for */
+    } else {
+      /* the name goes back to the top, so no section is current and the slab
+         travels to the start of the bar and becomes a line on its edge */
+      navLinks.forEach((l) => l.setAttribute("aria-current", "false"));
+      moveIndicator(false, true);
+    }
+    window.clearTimeout(lockTimer);
+    lockTimer = window.setTimeout(releaseNav, 1800);   /* safety net */
+  });
+
+  /* hand control back the moment the scroll settles, or the reader takes over */
+  if ("onscrollend" in window) {
+    window.addEventListener("scrollend", releaseNav);
+  }
+  window.addEventListener("scroll", () => {
+    if (!navLock) return;
+    window.clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(releaseNav, 160);
+  }, { passive: true });
+  ["wheel", "touchstart", "keydown"].forEach((ev) => {
+    window.addEventListener(ev, () => { if (navLock) releaseNav(); }, { passive: true });
+  });
+
+  if ("IntersectionObserver" in window) {
+    const seenObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add("seen");
+        revealBand(e.target);
+        seenObs.unobserve(e.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.04 });
+    bands.forEach((b) => b && seenObs.observe(b));
+
+    /* Which sections are currently in the reading band. Kept as a set rather
+       than acting on each entry, because scrolling to the very top empties it
+       entirely: every section reports that it has *left*, and reacting only to
+       arrivals would leave the indicator stranded on the last one. */
+    const inBand = new Set();
+
+    function currentSection() {
+      /* The foot of the page always reads as the last section. Once you cannot
+         scroll any further, the band stops moving, and a short final section can
+         sit entirely below it — so the band alone would leave the indicator
+         stranded on whatever it last crossed. */
+      if (window.scrollY >= pageBottom - 2) return order[order.length - 1];
+      /* When two sections share the band the later one wins: it is the one being
+         scrolled into. Deterministic, unlike reacting to each entry in turn. */
+      const lit = order.filter((k) => inBand.has(k));
+      return lit[lit.length - 1];
+    }
+
+    function syncIndicator() {
+      if (navLock) return;        /* a click owns the trip; ignore what we pass */
+      const id = currentSection();
+      navLinks.forEach((a) =>
+        a.setAttribute("aria-current", id && a.hash === "#" + id ? "true" : "false"));
+      moveIndicator(false, !id);  /* nothing current means the top: go home */
+    }
+
+    const activeObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) inBand.add(e.target.id);
+        else inBand.delete(e.target.id);
+      });
+      syncIndicator();
+    }, { rootMargin: "-30% 0px -55% 0px" });
+    bands.forEach((b) => b && activeObs.observe(b));
+
+    /* Arriving at or leaving the very bottom changes no intersection at all, so
+       that edge is watched directly. Only the crossing triggers a sync. */
+    let wasAtBottom = window.scrollY >= pageBottom - 2;
+    window.addEventListener("scroll", () => {
+      const atBottom = window.scrollY >= pageBottom - 2;
+      if (atBottom !== wasAtBottom) {
+        wasAtBottom = atBottom;
+        syncIndicator();
+      }
+    }, { passive: true });
+    /* settle it once now, in case the page opened already at the foot */
+    syncIndicator();
+  } else {
+    bands.forEach((b) => b && b.classList.add("seen"));
+  }
+
+  /* The cover, in sequence: chrome, then the name, then the pen stroke under
+     it, then everything the name introduces. One orchestrated moment. */
+  function overture() {
+    enter($("#nav"), [{ opacity: 0, transform: "translateY(-14px)" }, { opacity: 1, transform: "none" }], { duration: 520 });
+    enter($("#theme-btn"), [{ opacity: 0, transform: "skewX(-9deg) translateY(-14px)" }, { opacity: 1, transform: "skewX(-9deg)" }], { duration: 520, delay: 70 });
+    enter(document.querySelector(".hero-eyebrow"), rise, { duration: 500, delay: 60 });
+    enter(document.querySelector(".hero-name"),
+      [{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }], { duration: 620, delay: 110 });
+    enter(document.querySelector(".plate"),
+      [{ opacity: 0, transform: "translateY(20px) scale(.97)" }, { opacity: 1, transform: "none" }], { duration: 640, delay: 200 });
+    enter(document.querySelector(".hero-tagline"), rise, { duration: 520, delay: 420 });
+    enter(document.querySelector(".hero-actions"), rise, { duration: 520, delay: 500 });
+    document.querySelectorAll(".fact").forEach((f, i) =>
+      enter(f, [{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }],
+        { duration: 460, delay: 560 + i * 50 }));
+
+    /* the accent bar cuts across, left to right */
+    const bar = document.querySelector(".hero-bar");
+    if (bar) {
+      bar.style.transformOrigin = "left center";
+      enter(bar, [{ transform: "skewX(-9deg) scaleX(0)" }, { transform: "skewX(-9deg) scaleX(1)" }],
+        { duration: 700, delay: 280 });
+    }
+  }
+  overture();
+
+  /* the photo frame leans toward the pointer — fine pointers only */
+  const plateEl = document.querySelector(".plate");
+  const heroEl = document.querySelector(".hero");
+  if (plateEl && heroEl && window.matchMedia("(pointer:fine)").matches) {
+    const tilt = (e) => {
+      if (reduced()) return;
+      const r = plateEl.getBoundingClientRect();
+      const dx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
+      const dy = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
+      plateEl.style.setProperty("--tilt-y", (dx * 3.4).toFixed(2) + "deg");
+      plateEl.style.setProperty("--tilt-x", (-dy * 2.6).toFixed(2) + "deg");
+    };
+    heroEl.addEventListener("pointermove", tilt);
+    heroEl.addEventListener("pointerleave", () => {
+      plateEl.style.setProperty("--tilt-y", "0deg");
+      plateEl.style.setProperty("--tilt-x", "0deg");
+    });
+  }
+
+  /* ---- theme -------------------------------------------------- */
+
+  /* Two themes, and no third state to reason about: a dark ground with the
+     light-blue accent, or a light ground with the dark-blue one. An unstamped
+     root follows the viewer's own system setting. */
+  const themeBtn = $("#theme-btn");
+  let storedTheme = null;
+  try { storedTheme = localStorage.getItem("portfolio-theme"); } catch (err) { storedTheme = null; }
+  const configuredTheme = (P.theme || {}).default;
+  if (storedTheme === "light" || storedTheme === "dark") {
+    document.documentElement.dataset.theme = storedTheme;          /* their choice */
+  } else if (configuredTheme === "light" || configuredTheme === "dark") {
+    document.documentElement.dataset.theme = configuredTheme;      /* the config default */
+  }
+
+  function labelTheme() {
+    const stamped = document.documentElement.dataset.theme;
+    const isLight = stamped
+      ? stamped === "light"
+      : window.matchMedia("(prefers-color-scheme: light)").matches;
+    themeBtn.setAttribute("aria-label",
+      isLight ? "Switch to the dark theme" : "Switch to the light theme");
+    return isLight;
+  }
+  labelTheme();
+
+  themeBtn.addEventListener("click", () => {
+    const next = labelTheme() ? "dark" : "light";
+    /* ease the colours across rather than snapping them */
+    document.documentElement.classList.add("theming");
+    window.setTimeout(() => document.documentElement.classList.remove("theming"), 420);
+    document.documentElement.dataset.theme = next;
+    labelTheme();
+    enter(themeBtn, [{ transform: "skewX(-9deg) scale(.88)" }, { transform: "skewX(-9deg) scale(1)" }], { duration: 420 });
+    try { localStorage.setItem("portfolio-theme", next); } catch (err) { /* private window */ }
+  });
+
+  /* ---- a small spring: value + velocity, interruptible -------- */
+
+  function makeSpring(onFrame) {
+    let value = 0, velocity = 0, target = 0, k = 0, c = 0, raf = null, last = 0, rest = null;
+    function tick(now) {
+      const dt = Math.min((now - last) / 1000, 1 / 20);
+      last = now;
+      const steps = Math.max(1, Math.ceil(dt / (1 / 240)));
+      const h = dt / steps;
+      for (let i = 0; i < steps; i++) {
+        velocity += (-k * (value - target) - c * velocity) * h;
+        value += velocity * h;
+      }
+      onFrame(value);
+      if (Math.abs(value - target) < 0.4 && Math.abs(velocity) < 8) {
+        value = target; velocity = 0; onFrame(value); raf = null;
+        const done = rest; rest = null;
+        if (done) done();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    }
+    return {
+      get value() { return value; },
+      stop() { if (raf) cancelAnimationFrame(raf); raf = null; rest = null; },
+      jump(v) { this.stop(); value = v; velocity = 0; onFrame(value); },
+      /* response = seconds to reach the target; damping 1 = no overshoot */
+      to(t, opts) {
+        opts = opts || {};
+        const response = opts.response || 0.4;
+        const w = (2 * Math.PI) / response;
+        k = w * w;
+        c = 2 * (opts.damping == null ? 1 : opts.damping) * w;
+        target = t;
+        if (opts.velocity != null) velocity = opts.velocity;
+        rest = opts.onRest || null;
+        if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
+      }
+    };
+  }
+
+  /* momentum projection, as used for scroll deceleration */
+  const project = (v, rate) => (v / 1000) * (rate || 0.998) / (1 - (rate || 0.998));
+  /* progressive resistance past a boundary */
+  const rubberband = (over, dim) => (over * dim * 0.55) / (dim + 0.55 * Math.abs(over));
+
+  /* ---- project sheet ----------------------------------------- */
+
+  const root = $("#sheet-root");
+  const wrap = $("#sheet-wrap");
+  const sheet = $("#sheet");
+  const grab = $("#sheet-grab");
+  const scrim = $("#scrim");
+  const projects = (sections.coursework && sections.coursework.items) || [];
+  let opener = null, height = 0, dragging = false, startY = 0, startVal = 0, history = [], wasPast = false;
+
+  const spring = makeSpring((v) => {
+    wrap.style.transform = "translate3d(0," + v.toFixed(2) + "px,0)";
+  });
+
+  function fill(p) {
+    $("#sheet-meta").innerHTML =
+      '<span class="card-code"><span>' + esc(p.code || "") + "</span></span>" +
+      '<span class="label">' + esc(p.year || "") + "</span>" +
+      (p.tags || []).map((t) => '<span class="tag">' + esc(t) + "</span>").join("");
+    $("#sheet-title").textContent = p.title || "";
+    const d = p.detail || {};
+    const blocks = (d.blocks || []).map((b) =>
+      '<section class="sheet-block">' +
+        (b.heading ? '<h3 class="label">' + esc(b.heading) + "</h3>" : "") +
+        (b.body ? "<p>" + b.body + "</p>" : "") +
+        ((b.bullets || []).length
+          ? '<ul class="record-list">' + b.bullets.map((x) => "<li>" + x + "</li>").join("") + "</ul>"
+          : "") +
+      "</section>").join("");
+    const links = (d.links || []).length
+      ? '<div class="links">' + d.links.map(linkHTML).join("") + "</div>"
+      : "";
+    $("#sheet-scroll").innerHTML = (p.blurb ? '<p class="sheet-block">' + p.blurb + "</p>" : "") + blocks + links;
+    $("#sheet-scroll").scrollTop = 0;
+  }
+
+  function open(i, card) {
+    const p = projects[i];
+    if (!p) return;
+    opener = card || null;
+    fill(p);
+    root.hidden = false;
+    root.dataset.open = "1";
+    document.documentElement.style.overflow = "hidden";
+    height = wrap.offsetHeight || window.innerHeight;
+
+    /* grow from the card that was pressed */
+    if (card) {
+      const cr = card.getBoundingClientRect();
+      const sr = sheet.getBoundingClientRect();
+      const x = Math.max(0, Math.min(sr.width, cr.left + cr.width / 2 - sr.left));
+      sheet.style.transformOrigin = x.toFixed(0) + "px bottom";
+    }
+
+    if (reduced()) {
+      spring.jump(0);
+      root.dataset.shown = "1";
+    } else {
+      spring.jump(height);
+      void wrap.offsetHeight;        /* flush the off-screen position, no frame needed */
+      root.dataset.shown = "1";
+      spring.to(0, { response: 0.45, damping: 1 });
+    }
+    grab.dataset.past = "0";
+    wasPast = false;
+    Array.prototype.forEach.call($("#sheet-scroll").children, (el, i) =>
+      enter(el, [{ opacity: 0, transform: "translateY(14px)" }, { opacity: 1, transform: "none" }],
+        { duration: 420, delay: 140 + Math.min(i, 6) * 45 }));
+    $("#sheet-close").focus({ preventScroll: true });
+  }
+
+  let closeTimer = null;
+
+  function close(velocity) {
+    if (!root.dataset.open) return;
+    root.removeAttribute("data-shown");
+    const finish = () => {
+      if (closeTimer) { window.clearTimeout(closeTimer); closeTimer = null; }
+      root.hidden = true;
+      root.removeAttribute("data-open");
+      document.documentElement.style.overflow = "";
+      if (opener) { opener.focus({ preventScroll: true }); opener = null; }
+    };
+    if (reduced()) { closeTimer = window.setTimeout(finish, 180); return; }
+    spring.to(height || window.innerHeight, {
+      response: 0.32, damping: 1, velocity: velocity || 0, onRest: finish
+    });
+    /* If animation frames are not being delivered — a background tab, a window
+       behind another — the spring never reports rest. Close anyway. */
+    closeTimer = window.setTimeout(finish, 700);
+  }
+
+  document.addEventListener("click", (e) => {
+    const card = e.target.closest ? e.target.closest("[data-project]") : null;
+    if (card) open(Number(card.dataset.project), card);
+  });
+  $("#sheet-close").addEventListener("click", () => close());
+  scrim.addEventListener("click", () => close());
+  document.addEventListener("keydown", (e) => {
+    if (!root.dataset.open) return;
+    if (e.key === "Escape") { close(); return; }
+    if (e.key !== "Tab") return;
+    const items = sheet.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])');
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  /* drag the sheet: 1:1 tracking, resistance upward, momentum on release */
+  grab.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || reduced()) return;
+    /* Never start a drag on a control. Capturing the pointer here would
+       redirect the click away from the close button, so X would do nothing. */
+    if (e.target.closest && e.target.closest("button, a")) return;
+    grab.setPointerCapture(e.pointerId);
+    dragging = true;
+    spring.stop();
+    height = wrap.offsetHeight || window.innerHeight;
+    startY = e.clientY;
+    startVal = spring.value;
+    history = [{ y: e.clientY, t: performance.now() }];
+    scrim.style.transition = "none";
+  });
+
+  grab.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const dy = e.clientY - startY;
+    let v = startVal + dy;
+    if (v < 0) v = -rubberband(-v, height);
+    spring.jump(v);
+    scrim.style.opacity = String(Math.max(0, 1 - Math.max(0, v) / height));
+    /* fires twice per drag, not every frame */
+    const past = v > height * 0.3;
+    if (past !== wasPast) {
+      wasPast = past;
+      grab.dataset.past = past ? "1" : "0";
+      if (navigator.vibrate) { try { navigator.vibrate(past ? 10 : 6); } catch (err) { /* no vibration */ } }
+    }
+    history.push({ y: e.clientY, t: performance.now() });
+    if (history.length > 6) history.shift();
+  });
+
+  function release() {
+    if (!dragging) return;
+    dragging = false;
+    grab.dataset.past = "0";
+    wasPast = false;
+    scrim.style.transition = "";
+    scrim.style.opacity = "";
+
+    const now = performance.now();
+    let velocity = 0;
+    for (let i = history.length - 2; i >= 0; i--) {
+      const dt = now - history[i].t;
+      if (dt > 25) {
+        velocity = ((history[history.length - 1].y - history[i].y) / dt) * 1000;
+        break;
+      }
+    }
+    const projected = spring.value + project(velocity);
+    if (projected > height * 0.3 || velocity > 700) close(velocity);
+    else spring.to(0, { response: 0.3, damping: 0.8, velocity: velocity });
+  }
+  grab.addEventListener("pointerup", release);
+  grab.addEventListener("pointercancel", release);
+
+
+  /* ---- custom cursor ------------------------------------------
+     Two followers with two different jobs:
+       dot  - written straight from the pointer event, so it has no lag at all
+       ring - eases toward the pointer, then is clamped so the gap can never
+              exceed its own radius; the dot therefore cannot leave the ring
+     One rAF loop, transforms only. */
+  const cur = $("#cur");
+  if (cur && window.matchMedia("(hover:hover) and (pointer:fine)").matches) {
+    const cDot = $("#cur-dot"), cRing = $("#cur-ring");
+    const DOT_R = 4, RING_R = 19;
+    const MAX_GAP = RING_R - DOT_R - 1.5;      /* the hard boundary */
+    const HOT = 'a,button,[role="button"],.sheet-grab,summary,label';
+
+    let px = window.innerWidth / 2, py = window.innerHeight / 2;   /* pointer */
+    let rx = px, ry = py;                                          /* ring */
+    let seen = false, last = performance.now();
+
+    const place = (el, x, y, extra) =>
+      el.style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0)" + (extra || "");
+
+    window.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return;
+      px = e.clientX; py = e.clientY;
+      place(cDot, px, py);                     /* the dot moves in the event itself */
+      if (!seen) {
+        /* hide the native cursor only now: before the first move there would
+           otherwise be no pointer on screen at all */
+        seen = true;
+        document.body.classList.add("has-cursor");
+        cur.dataset.on = "1";
+        rx = px; ry = py;
+      }
+      const t = e.target;
+      cur.dataset.hot = (t && t.closest && t.closest(HOT)) ? "1" : "0";
+    }, { passive: true });
+
+    window.addEventListener("pointerdown", () => { cur.dataset.down = "1"; }, { passive: true });
+    window.addEventListener("pointerup", () => { cur.dataset.down = "0"; }, { passive: true });
+    document.addEventListener("mouseleave", () => { cur.dataset.on = "0"; });
+    document.addEventListener("mouseenter", () => { if (seen) cur.dataset.on = "1"; });
+
+    function cursorFrame(now) {
+      const dt = Math.min(now - last, 50) || 16.667;
+      last = now;
+      /* the same easing whatever the refresh rate */
+      const ease = (rate) => 1 - Math.pow(1 - rate, dt / 16.667);
+
+      if (reduced()) {
+        rx = px; ry = py;
+      } else {
+        rx += (px - rx) * ease(0.17);
+        ry += (py - ry) * ease(0.17);
+        const dx = px - rx, dy = py - ry, d = Math.sqrt(dx * dx + dy * dy);
+        if (d > MAX_GAP) {                     /* outrun: snap the ring back onto the dot */
+          rx = px - (dx / d) * MAX_GAP;
+          ry = py - (dy / d) * MAX_GAP;
+        }
+      }
+      place(cRing, rx, ry);
+      requestAnimationFrame(cursorFrame);
+    }
+    requestAnimationFrame(cursorFrame);
+  }
+
+  window.addEventListener("resize", () => {
+    if (root.dataset.open) height = wrap.offsetHeight || window.innerHeight;
+  });
+})();
+</script>
+
+<!--ARTIFACT-END-->
+</body>
+</html>
+
